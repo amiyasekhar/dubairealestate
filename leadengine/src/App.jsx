@@ -202,7 +202,7 @@ function Dot({ className }) {
 function Header({ activeTab, setActiveTab }) {
   const tabs = [
     { id: 'dashboard', label: 'Operations Dashboard' },
-    { id: 'demo', label: 'Live Demo' },
+    { id: 'flow', label: 'test' },
   ];
   return (
     <header className="border-b border-line bg-canvas/95 backdrop-blur sticky top-0 z-50">
@@ -466,7 +466,7 @@ function OperationsDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Simulate status changes
+  // Advance lead statuses
   useEffect(() => {
     const interval = setInterval(() => {
       setLeads(prev => prev.map(lead => {
@@ -548,7 +548,7 @@ function OperationsDashboard() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// LIVE DEMO VIEW
+// LEAD FLOW VIEW
 // ═══════════════════════════════════════════════════════════════
 
 // WhatsApp renders *text* as bold
@@ -560,7 +560,7 @@ function formatWhatsApp(text) {
   ));
 }
 
-// --- WhatsApp Phone Mockup ---
+// --- WhatsApp Phone ---
 function WhatsAppPhone({ label, messages, contactName }) {
   const chatRef = useRef(null);
 
@@ -714,8 +714,8 @@ function Field({ id, label, children }) {
   );
 }
 
-// --- Live Demo View ---
-function LiveDemo() {
+// --- Lead Flow View ---
+function LeadFlow() {
   const [form, setForm] = useState({
     name: 'Rajesh Mehta',
     nationality: 'India',
@@ -733,7 +733,7 @@ function LiveDemo() {
   const [outcomeResult, setOutcomeResult] = useState(null);
   const timeoutRefs = useRef([]);
 
-  const resetDemo = useCallback(() => {
+  const resetRun = useCallback(() => {
     timeoutRefs.current.forEach(t => clearTimeout(t));
     timeoutRefs.current = [];
     setTimelineSteps([]);
@@ -775,8 +775,8 @@ function LiveDemo() {
 
   const natFlag = NATIONALITIES[form.nationality]?.flag || '';
 
-  const runDemo = useCallback(() => {
-    resetDemo();
+  const runFlow = useCallback(() => {
+    resetRun();
     setIsRunning(true);
 
     const steps = [
@@ -831,9 +831,9 @@ function LiveDemo() {
       setShowOutcomeButtons(true);
     }, 8000);
     timeoutRefs.current.push(outcomeTimeout);
-  }, [form, matchedAgent, natFlag, resetDemo]);
+  }, [form, matchedAgent, natFlag, resetRun]);
 
-  const simulateConfirm = useCallback(() => {
+  const confirmContact = useCallback(() => {
     setShowOutcomeButtons(false);
     setOutcomeResult('confirmed');
     // Add agent confirmation message
@@ -846,7 +846,7 @@ function LiveDemo() {
     }]);
   }, [form.name]);
 
-  const simulateEscalation = useCallback(() => {
+  const triggerEscalation = useCallback(() => {
     setShowOutcomeButtons(false);
     setOutcomeResult('escalated');
 
@@ -879,8 +879,8 @@ function LiveDemo() {
   const setField = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
 
   const timelineRef = useRef(null);
-  const startDemo = () => {
-    runDemo();
+  const startRun = () => {
+    runFlow();
     if (window.matchMedia('(max-width: 1023px)').matches) {
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       timelineRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
@@ -889,7 +889,7 @@ function LiveDemo() {
 
   return (
     <main className={`${PAGE} py-6 space-y-5`}>
-      <PageHeading title="Live demo" description="Send a sample lead through routing, messaging and escalation." />
+      <PageHeading title="Lead automation" description="Send a lead through routing, messaging and escalation." />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Left: Lead Trigger */}
@@ -922,11 +922,11 @@ function LiveDemo() {
               <input id="lead-budget" className={FIELD} value={form.budget} onChange={setField('budget')} />
             </Field>
             <button
-              onClick={isRunning ? resetDemo : startDemo}
+              onClick={isRunning ? resetRun : startRun}
               className={`w-full sm:col-span-2 lg:col-span-1 ${isRunning ? BTN_SECONDARY : BTN_PRIMARY}`}
             >
               <Icon name={isRunning ? 'reset' : 'play'} />
-              {isRunning ? 'Reset demo' : 'Simulate new lead'}
+              {isRunning ? 'Reset' : 'Send new lead'}
             </button>
           </Panel>
         </div>
@@ -937,7 +937,7 @@ function LiveDemo() {
             {timelineSteps.length === 0 && !isRunning && (
               <div className="py-16 text-center">
                 <div className="text-sm font-medium text-ink">No lead in progress</div>
-                <div className="text-[13px] text-ink-3 mt-1">Press "Simulate new lead" to watch the automation run step by step.</div>
+                <div className="text-[13px] text-ink-3 mt-1">Press "Send new lead" to watch the automation run step by step.</div>
               </div>
             )}
             {timelineSteps.length === 0 && isRunning && (
@@ -952,13 +952,13 @@ function LiveDemo() {
             {/* Outcome buttons */}
             {showOutcomeButtons && !outcomeResult && (
               <div className="mt-5 pt-4 border-t border-line animate-enter">
-                <div className="text-[13px] text-ink-2 mb-3">Choose an outcome to simulate</div>
+                <div className="text-[13px] text-ink-2 mb-3">Choose how the agent responds</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button onClick={simulateConfirm} className={BTN_SECONDARY}>
+                  <button onClick={confirmContact} className={BTN_SECONDARY}>
                     <Icon name="check" className="w-4 h-4 text-positive" />
                     Agent confirms contact
                   </button>
-                  <button onClick={simulateEscalation} className={BTN_SECONDARY}>
+                  <button onClick={triggerEscalation} className={BTN_SECONDARY}>
                     <Icon name="warning" className="w-4 h-4 text-negative" />
                     Agent doesn't respond
                   </button>
@@ -983,7 +983,7 @@ function LiveDemo() {
           </Panel>
         </div>
 
-        {/* Right: WhatsApp Mockups */}
+        {/* Right: WhatsApp Phones */}
         <div className="lg:col-span-12 xl:col-span-4 min-w-0 sticky-when-tall">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-5">
             <WhatsAppPhone
@@ -1013,7 +1013,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-canvas">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
-      {activeTab === 'dashboard' ? <OperationsDashboard /> : <LiveDemo />}
+      {activeTab === 'dashboard' ? <OperationsDashboard /> : <LeadFlow />}
     </div>
   );
 }

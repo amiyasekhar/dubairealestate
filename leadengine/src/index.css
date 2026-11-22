@@ -25,7 +25,7 @@
   --color-positive: #44BD88;
   --color-negative: #F26D6A;
 
-  /* WhatsApp mock-up (WhatsApp's own dark palette) */
+  /* WhatsApp chat (WhatsApp's own dark palette) */
   --color-wa-bg: #0B141A;
   --color-wa-bar: #1F2C34;
   --color-wa-field: #2A3942;
@@ -79,7 +79,7 @@ select:focus-visible {
   border-radius: 4px;
 }
 
-/* Side-by-side demo: keep the phones in view only when both fit */
+/* Side-by-side layout: keep the phones in view only when both fit */
 @media (min-width: 1280px) and (min-height: 880px) {
   .sticky-when-tall {
     position: sticky;
