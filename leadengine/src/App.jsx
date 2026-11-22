@@ -17,22 +17,6 @@ const AGENTS = [
 
 const SOURCES = ['Property Finder', 'Bayut', 'Google Ads', 'Instagram', 'WhatsApp'];
 
-const SOURCE_COLORS = {
-  'Property Finder': 'bg-pf-blue',
-  'Bayut': 'bg-bayut-purple',
-  'Google Ads': 'bg-google-green',
-  'Instagram': 'bg-insta-pink',
-  'WhatsApp': 'bg-whatsapp-green',
-};
-
-const SOURCE_TEXT_COLORS = {
-  'Property Finder': 'text-pf-blue',
-  'Bayut': 'text-bayut-purple',
-  'Google Ads': 'text-google-green',
-  'Instagram': 'text-insta-pink',
-  'WhatsApp': 'text-whatsapp-green',
-};
-
 const NATIONALITIES = {
   'India': { flag: '\u{1F1EE}\u{1F1F3}', names: ['Rajesh Mehta', 'Vikram Patel', 'Ananya Iyer', 'Arjun Kapoor', 'Neha Gupta', 'Sanjay Reddy', 'Deepika Nair', 'Rohit Sharma'], budgetRange: [1, 3], areas: ['Dubai Marina', 'Business Bay', 'JVC', 'Creek Harbour'], types: ['Apartment'], bedrooms: [1, 2, 3] },
   'Russia': { flag: '\u{1F1F7}\u{1F1FA}', names: ['Alexei Petrov', 'Natasha Sokolov', 'Ivan Kuznetsov', 'Olga Ivanova', 'Dmitry Popov', 'Svetlana Morozova'], budgetRange: [3, 10], areas: ['Palm Jumeirah', 'Dubai Marina', 'JBR'], types: ['Villa', 'Penthouse', 'Apartment'], bedrooms: [2, 3, 4, 5] },
@@ -89,7 +73,6 @@ function generateLead(id, ageSeconds = null) {
   const agent = randomItem(AGENTS);
   const age = ageSeconds !== null ? ageSeconds : 0;
 
-  const statuses = ['pending', 'contacted', 'overdue'];
   let status;
   if (age < 30) {
     status = 'pending';
@@ -133,76 +116,145 @@ function generateInitialLeads() {
   return leads;
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// UI PRIMITIVES
+// ═══════════════════════════════════════════════════════════════
+
+const PAGE = 'mx-auto w-full max-w-[1440px] px-4 sm:px-6';
+
+const BTN = 'inline-flex items-center justify-center gap-2 h-11 sm:h-10 px-4 rounded-md text-sm font-medium transition-colors cursor-pointer';
+const BTN_PRIMARY = `${BTN} bg-accent text-on-accent hover:bg-accent-hover`;
+const BTN_SECONDARY = `${BTN} bg-raised border border-line-strong text-ink hover:border-ink-3`;
+
+const FIELD = 'w-full h-11 sm:h-10 bg-canvas border border-line-strong rounded-md px-3 text-base sm:text-sm text-ink transition-colors hover:border-ink-3 focus:border-accent focus:ring-2 focus:ring-accent/25';
+
+const TONE_TEXT = {
+  positive: 'text-positive',
+  negative: 'text-negative',
+  warning: 'text-accent',
+  neutral: 'text-ink-2',
+};
+
+// --- Icons: one 20px stroke set, drawn inline ---
+const ICONS = {
+  check: <path d="M4.5 10.5 8 14l7.5-8" />,
+  clock: <><circle cx="10" cy="10" r="7" /><path d="M10 6.5V10l2.5 1.5" /></>,
+  warning: <><path d="M10 3.5 17 16H3L10 3.5Z" /><path d="M10 8.5V12" /><path d="M10 14.1v.1" /></>,
+  alert: <><circle cx="10" cy="10" r="7" /><path d="M10 6.5v4" /><path d="M10 13.4v.1" /></>,
+  swap: <path d="M4 7h11l-3-3M16 13H5l3 3" />,
+  bell: <><path d="M5.5 14V9a4.5 4.5 0 0 1 9 0v5l1.5 1.5H4L5.5 14Z" /><path d="M8.5 17.5h3" /></>,
+  play: <path d="M7 5.5 14.5 10 7 14.5v-9Z" />,
+  reset: <><path d="M15.5 10a5.5 5.5 0 1 1-1.7-4" /><path d="M15.5 3.5V7H12" /></>,
+  back: <path d="M16 10H4m5-5-5 5 5 5" />,
+  plus: <path d="M10 4.5v11M4.5 10h11" />,
+  mic: <><rect x="7.5" y="3" width="5" height="9" rx="2.5" /><path d="M5 10a5 5 0 0 0 10 0M10 15v2.5" /></>,
+};
+
+function Icon({ name, className = 'w-4 h-4' }) {
+  return (
+    <svg
+      className={`shrink-0 ${className}`}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {ICONS[name]}
+    </svg>
+  );
+}
+
+// --- Panel: the one container used for every section ---
+function Panel({ title, aside = null, children, className = '', bodyClassName = '' }) {
+  return (
+    <section className={`bg-surface border border-line rounded-lg flex flex-col min-w-0 ${className}`}>
+      <header className="min-h-12 px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-line shrink-0">
+        <h2 className="text-sm font-semibold text-ink">{title}</h2>
+        {aside}
+      </header>
+      <div className={`flex-1 min-h-0 ${bodyClassName}`}>{children}</div>
+    </section>
+  );
+}
+
+function PageHeading({ title, description }) {
+  return (
+    <div>
+      <h1 className="text-xl font-semibold tracking-tight text-ink">{title}</h1>
+      <p className="text-sm text-ink-3 mt-1">{description}</p>
+    </div>
+  );
+}
+
+function Dot({ className }) {
+  return <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${className}`}></span>;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // COMPONENTS
 // ═══════════════════════════════════════════════════════════════
 
 // --- Header ---
 function Header({ activeTab, setActiveTab }) {
+  const tabs = [
+    { id: 'dashboard', label: 'Operations Dashboard' },
+    { id: 'demo', label: 'Live Demo' },
+  ];
   return (
-    <header className="border-b border-dark-border bg-dark-card/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="max-w-[1920px] mx-auto px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-accent rounded flex items-center justify-center font-bold text-black text-sm">LE</div>
-          <span className="text-lg font-semibold text-white tracking-tight">LeadEngine</span>
-          <span className="text-xs text-gray-500 ml-1 hidden sm:inline">Dubai Real Estate Lead Automation</span>
+    <header className="border-b border-line bg-canvas/95 backdrop-blur sticky top-0 z-50">
+      <div className={`${PAGE} flex flex-wrap items-center gap-x-8`}>
+        <div className="flex items-center gap-2.5 h-14">
+          <div className="w-7 h-7 bg-accent rounded-md flex items-center justify-center font-semibold text-on-accent text-xs tracking-tight">LE</div>
+          <span className="text-[15px] font-semibold text-ink tracking-tight">LeadEngine</span>
+          <span className="text-[13px] text-ink-3 ml-2 pl-3 border-l border-line hidden lg:inline">Dubai Real Estate Lead Automation</span>
         </div>
-        <div className="flex items-center gap-1 bg-dark-bg rounded-lg p-1">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
-              activeTab === 'dashboard' ? 'bg-dark-card text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            Operations Dashboard
-          </button>
-          <button
-            onClick={() => setActiveTab('demo')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
-              activeTab === 'demo' ? 'bg-dark-card text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            Live Demo
-          </button>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-          <span className="text-xs text-gray-400">Live</span>
-          <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-xs text-accent font-semibold">OA</div>
+        <nav aria-label="Views" className="order-last sm:order-none w-full sm:w-auto flex gap-6 border-t border-line sm:border-t-0 -mx-4 px-4 sm:mx-0 sm:px-0 box-content sm:box-border">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              className={`h-11 sm:h-14 -mb-px border-b-2 text-sm font-medium transition-colors cursor-pointer ${
+                activeTab === tab.id ? 'border-accent text-ink' : 'border-transparent text-ink-3 hover:text-ink'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+        <div className="ml-auto flex items-center gap-4 h-14">
+          <span className="flex items-center gap-2 text-[13px] text-ink-2">
+            <Dot className="bg-positive" />
+            Live
+          </span>
+          <div className="w-8 h-8 rounded-full bg-raised border border-line-strong flex items-center justify-center text-xs text-ink-2 font-medium">OA</div>
         </div>
       </div>
     </header>
   );
 }
 
-// --- KPI Cards ---
-function KPICard({ label, value, sub, color = 'text-white', badge = null }) {
+// --- KPI cell ---
+function KPICard({ label, value, sub, badge = null }) {
   return (
-    <div className="bg-dark-card border border-dark-border rounded-lg p-5 flex-1 min-w-[200px]">
-      <div className="text-xs text-gray-500 uppercase tracking-wider mb-2 font-medium">{label}</div>
-      <div className="flex items-baseline gap-2">
-        <span className={`text-3xl font-bold ${color} tracking-tight`}>{value}</span>
-        {badge && (
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.color}`}>{badge.text}</span>
-        )}
+    <div className="bg-surface px-4 py-4 sm:px-5 min-w-0">
+      <div className="text-[13px] text-ink-3">{label}</div>
+      <div className="mt-2 text-2xl sm:text-[28px] leading-8 font-semibold text-ink tracking-tight tabular-nums whitespace-nowrap">{value}</div>
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 text-[13px]">
+        {badge && <span className={`font-medium ${TONE_TEXT[badge.tone]}`}>{badge.text}</span>}
+        {sub && <span className="text-ink-3">{sub}</span>}
       </div>
-      {sub && <div className="text-xs text-gray-500 mt-1">{sub}</div>}
     </div>
-  );
-}
-
-// --- Source Badge ---
-function SourceBadge({ source }) {
-  return (
-    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full text-white ${SOURCE_COLORS[source]} bg-opacity-90`}>
-      {source}
-    </span>
   );
 }
 
 // --- Live Timer ---
 function LiveTimer({ createdAt, status }) {
-  const [elapsed, setElapsed] = useState(Math.floor((Date.now() - createdAt) / 1000));
+  const [elapsed, setElapsed] = useState(() => Math.floor((Date.now() - createdAt) / 1000));
 
   useEffect(() => {
     if (status === 'contacted') return;
@@ -215,101 +267,125 @@ function LiveTimer({ createdAt, status }) {
   return <span>{formatTime(elapsed)}</span>;
 }
 
-// --- Lead Card ---
+// --- Lead row ---
+const LEAD_STATUS = {
+  contacted: { label: 'Contacted', dot: 'bg-positive', text: 'text-ink-2' },
+  pending: { label: 'Pending', dot: 'bg-accent', text: 'text-ink-2' },
+  overdue: { label: 'Overdue', dot: 'bg-negative', text: 'text-negative' },
+};
+
 function LeadCard({ lead, isNew }) {
-  const statusConfig = {
-    contacted: { label: `Contacted in ${lead.contactTime}s`, color: 'text-success', bg: 'bg-success/10', border: 'border-success/20' },
-    pending: { label: 'Pending', color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
-    overdue: { label: 'Overdue', color: 'text-danger animate-pulse-red', bg: 'bg-danger/10', border: 'border-danger/20' },
-  };
-  const s = statusConfig[lead.status];
+  const s = LEAD_STATUS[lead.status];
 
   return (
-    <div className={`bg-dark-card border border-dark-border rounded-lg p-4 transition-all duration-300 hover:border-gray-600 ${isNew ? 'animate-slide-in' : ''} ${lead.status === 'overdue' ? 'border-danger/30' : ''}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-sm font-semibold text-white truncate">{lead.flag} {lead.name}</span>
-            <SourceBadge source={lead.source} />
-          </div>
-          <div className="text-xs text-gray-400 mb-1.5 truncate">{lead.property}</div>
-          <div className="flex items-center gap-3 text-xs">
-            <span className="text-gray-500">Agent: <span className="text-gray-300">{lead.agent}</span></span>
-          </div>
+    <li className={`px-4 py-3 flex items-start justify-between gap-4 ${isNew ? 'animate-row-in' : ''}`}>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium text-ink truncate">
+          <span className="mr-1.5" aria-hidden="true">{lead.flag}</span>
+          {lead.name}
         </div>
-        <div className="text-right flex-shrink-0">
-          <div className={`text-xs font-semibold px-2 py-1 rounded ${s.bg} ${s.color} ${s.border} border mb-1.5`}>
-            {lead.status === 'contacted' ? s.label : (
-              <span className="flex items-center gap-1">
-                {s.label} <LiveTimer createdAt={lead.createdAt} status={lead.status} />
-              </span>
-            )}
-          </div>
-          <div className="text-[10px] text-gray-600">
-            {lead.status !== 'contacted' && (
-              <span className="flex items-center justify-end gap-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-600"></span>
-                <LiveTimer createdAt={lead.createdAt} status={lead.status} /> ago
-              </span>
-            )}
-          </div>
+        <div className="text-[13px] text-ink-2 mt-0.5 sm:truncate">{lead.property}</div>
+        <div className="text-xs text-ink-3 mt-1 truncate">
+          {lead.source} <span aria-hidden="true">·</span> Assigned to {lead.agent}
         </div>
       </div>
-    </div>
+      <div className="text-right shrink-0">
+        <div className={`inline-flex items-center gap-1.5 text-[13px] font-medium ${s.text}`}>
+          <Dot className={s.dot} />
+          {s.label}
+        </div>
+        <div className="text-xs text-ink-3 mt-0.5 tabular-nums">
+          {lead.status === 'contacted'
+            ? `in ${lead.contactTime}s`
+            : <>waiting <LiveTimer createdAt={lead.createdAt} status={lead.status} /></>}
+        </div>
+      </div>
+    </li>
   );
 }
 
 // --- Agent Leaderboard ---
 function AgentLeaderboard() {
   const sorted = useMemo(() => [...AGENTS].sort((a, b) => b.contactRate - a.contactRate), []);
+  const th = 'px-3 py-2.5 font-medium text-xs text-ink-3 whitespace-nowrap';
+  const td = 'px-3 py-3 whitespace-nowrap tabular-nums';
   return (
-    <div className="bg-dark-card border border-dark-border rounded-lg overflow-hidden h-full flex flex-col">
-      <div className="px-4 py-3 border-b border-dark-border">
-        <h3 className="text-sm font-semibold text-white">Agent Leaderboard</h3>
-      </div>
-      <div className="overflow-auto flex-1">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b border-dark-border text-gray-500 uppercase tracking-wider">
-              <th className="text-left px-4 py-2.5 font-medium">Agent</th>
-              <th className="text-center px-2 py-2.5 font-medium">Leads</th>
-              <th className="text-center px-2 py-2.5 font-medium">Avg Resp</th>
-              <th className="text-center px-2 py-2.5 font-medium">Contact %</th>
-              <th className="text-right px-4 py-2.5 font-medium">Pipeline</th>
+    <Panel title="Agent leaderboard" className="h-full" bodyClassName="overflow-x-auto">
+      <ul className="sm:hidden divide-y divide-line">
+        {sorted.map((agent, i) => (
+          <li key={agent.id} className="px-4 py-3">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="w-4 text-ink-3 tabular-nums">{i + 1}</span>
+              <Dot className={agent.online ? 'bg-positive' : 'bg-line-strong'} />
+              <span className="font-medium text-ink truncate">{agent.name}</span>
+              <span className="sr-only">{agent.online ? '(online)' : '(offline)'}</span>
+            </div>
+            <dl className="mt-2 pl-6 grid grid-cols-4 gap-x-3 tabular-nums">
+              {[
+                ['Leads', agent.leadsToday, 'text-ink-2'],
+                ['Avg resp.', `${agent.avgResponse}s`, agent.avgResponse < 60 ? 'text-positive' : agent.avgResponse > 120 ? 'text-negative' : 'text-ink-2'],
+                ['Contact', `${agent.contactRate}%`, agent.contactRate > 85 ? 'text-positive' : agent.contactRate < 50 ? 'text-negative' : 'text-ink-2'],
+                ['Pipeline', `AED ${agent.pipeline.toFixed(1)}M`, 'text-ink-2'],
+              ].map(([label, value, color]) => (
+                <div key={label} className="min-w-0">
+                  <dt className="text-xs text-ink-3 truncate">{label}</dt>
+                  <dd className={`text-[13px] font-medium mt-0.5 ${color}`}>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </li>
+        ))}
+      </ul>
+      <table className="hidden sm:table w-full text-[13px]">
+        <thead>
+          <tr className="border-b border-line">
+            <th className={`${th} text-left pl-4 w-8`}>#</th>
+            <th className={`${th} text-left`}>Agent</th>
+            <th className={`${th} text-right`}>Leads</th>
+            <th className={`${th} text-right`}>Avg response</th>
+            <th className={`${th} text-right`}>Contact rate</th>
+            <th className={`${th} text-right pr-4`}>Pipeline</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-line">
+          {sorted.map((agent, i) => (
+            <tr key={agent.id} className="hover:bg-raised/60 transition-colors">
+              <td className={`${td} pl-4 text-ink-3`}>{i + 1}</td>
+              <td className="px-3 py-3 whitespace-nowrap">
+                <span className="flex items-center gap-2">
+                  <Dot className={agent.online ? 'bg-positive' : 'bg-line-strong'} />
+                  <span className="font-medium text-ink">{agent.name}</span>
+                  <span className="sr-only">{agent.online ? '(online)' : '(offline)'}</span>
+                </span>
+              </td>
+              <td className={`${td} text-right text-ink-2`}>{agent.leadsToday}</td>
+              <td className={`${td} text-right font-medium ${agent.avgResponse < 60 ? 'text-positive' : agent.avgResponse > 120 ? 'text-negative' : 'text-ink-2'}`}>
+                {agent.avgResponse}s
+              </td>
+              <td className={`${td} text-right font-medium ${agent.contactRate > 85 ? 'text-positive' : agent.contactRate < 50 ? 'text-negative' : 'text-ink-2'}`}>
+                {agent.contactRate}%
+              </td>
+              <td className={`${td} text-right pr-4 text-ink-2`}>AED {agent.pipeline.toFixed(1)}M</td>
             </tr>
-          </thead>
-          <tbody>
-            {sorted.map((agent, i) => (
-              <tr key={agent.id} className={`border-b border-dark-border/50 hover:bg-white/[0.02] transition-colors ${agent.tier === 'low' ? 'bg-danger/[0.03]' : ''}`}>
-                <td className="px-4 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${agent.online ? 'bg-success' : 'bg-gray-600'}`}></div>
-                    <span className={`font-medium ${agent.tier === 'high' ? 'text-white' : agent.tier === 'low' ? 'text-danger' : 'text-gray-300'}`}>
-                      {agent.name}
-                    </span>
-                    {i === 0 && <span className="text-accent text-[10px]">#1</span>}
-                  </div>
-                </td>
-                <td className="text-center px-2 py-2.5 text-gray-300">{agent.leadsToday}</td>
-                <td className={`text-center px-2 py-2.5 font-mono font-semibold ${agent.avgResponse < 60 ? 'text-success' : agent.avgResponse > 120 ? 'text-danger' : 'text-accent'}`}>
-                  {agent.avgResponse}s
-                </td>
-                <td className="text-center px-2 py-2.5">
-                  <span className={`font-semibold ${agent.contactRate > 85 ? 'text-success' : agent.contactRate < 50 ? 'text-danger' : 'text-gray-300'}`}>
-                    {agent.contactRate}%
-                  </span>
-                </td>
-                <td className="text-right px-4 py-2.5 text-gray-300 font-mono">AED {agent.pipeline}M</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </Panel>
   );
 }
 
 // --- Source Performance ---
+function Meter({ fraction, value, title, barClassName }) {
+  return (
+    <div className="flex items-center gap-2.5 min-w-0" title={title}>
+      <div className="flex-1 h-1.5 rounded-full bg-raised overflow-hidden">
+        <div className={`h-full rounded-full ${barClassName}`} style={{ width: `${Math.round(fraction * 100)}%` }}></div>
+      </div>
+      <span className="w-8 text-right text-ink tabular-nums">{value}</span>
+    </div>
+  );
+}
+
 function SourcePerformance() {
   const data = [
     { source: 'Property Finder', volume: 14, conversion: 18 },
@@ -319,70 +395,57 @@ function SourcePerformance() {
     { source: 'WhatsApp', volume: 3, conversion: 22 },
   ];
   const maxVol = Math.max(...data.map(d => d.volume));
+  const maxConv = Math.max(...data.map(d => d.conversion));
+  const row = 'grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)_minmax(0,1fr)] items-center gap-x-4 sm:gap-x-6 px-4';
 
   return (
-    <div className="bg-dark-card border border-dark-border rounded-lg p-4 h-full">
-      <h3 className="text-sm font-semibold text-white mb-4">Lead Source Performance</h3>
-      <div className="space-y-3">
+    <Panel title="Lead source performance" className="h-full">
+      <div className={`${row} py-2.5 text-xs font-medium text-ink-3 border-b border-line`}>
+        <span>Source</span>
+        <span>Leads</span>
+        <span>Conversion</span>
+      </div>
+      <ul className="divide-y divide-line text-[13px]">
         {data.map(d => (
-          <div key={d.source} className="space-y-1">
-            <div className="flex items-center justify-between text-xs">
-              <span className={`font-medium ${SOURCE_TEXT_COLORS[d.source]}`}>{d.source}</span>
-              <span className="text-gray-500">{d.volume} leads / {d.conversion}% conv</span>
-            </div>
-            <div className="flex gap-1.5 h-3">
-              <div
-                className={`h-full rounded-sm ${SOURCE_COLORS[d.source]} animate-bar-grow`}
-                style={{ width: `${(d.volume / maxVol) * 60}%` }}
-                title={`${d.volume} leads`}
-              ></div>
-              <div
-                className={`h-full rounded-sm ${SOURCE_COLORS[d.source]} opacity-40 animate-bar-grow`}
-                style={{ width: `${(d.conversion / 30) * 35}%`, animationDelay: '0.3s' }}
-                title={`${d.conversion}% conversion`}
-              ></div>
-            </div>
-          </div>
+          <li key={d.source} className={`${row} py-3`}>
+            <span className="font-medium text-ink truncate">{d.source}</span>
+            <Meter fraction={d.volume / maxVol} value={d.volume} title={`${d.volume} leads`} barClassName="bg-ink-3" />
+            <Meter fraction={d.conversion / maxConv} value={`${d.conversion}%`} title={`${d.conversion}% conversion`} barClassName="bg-ink-2" />
+          </li>
         ))}
-      </div>
-      <div className="flex gap-4 mt-4 text-[10px] text-gray-500">
-        <span className="flex items-center gap-1"><span className="w-3 h-2 bg-gray-500 rounded-sm inline-block"></span>Volume</span>
-        <span className="flex items-center gap-1"><span className="w-3 h-2 bg-gray-500 opacity-40 rounded-sm inline-block"></span>Conversion Rate</span>
-      </div>
-    </div>
+      </ul>
+    </Panel>
   );
 }
 
 // --- Escalation Alerts ---
+const ALERT_STYLE = {
+  warning: { icon: 'warning', color: 'text-accent' },
+  critical: { icon: 'alert', color: 'text-negative' },
+  success: { icon: 'check', color: 'text-positive' },
+  info: { icon: 'clock', color: 'text-ink-3' },
+};
+
 function EscalationAlerts() {
-  const [alerts, setAlerts] = useState([
-    { id: 1, icon: '\u26A0\uFE0F', text: 'Khalid has 6 uncontacted leads (oldest: 23 min)', type: 'warning', time: '2 min ago' },
-    { id: 2, icon: '\uD83D\uDD25', text: 'High-value lead (AED 5.1M villa, Palm Jumeirah) unassigned for 4 min', type: 'critical', time: '4 min ago' },
-    { id: 3, icon: '\u2705', text: 'Priya just contacted Wei Zhang (response time: 28s)', type: 'success', time: '1 min ago' },
-    { id: 4, icon: '\uD83D\uDCF1', text: "Follow-up reminder: Alexei Petrov hasn't been contacted in 12 days", type: 'info', time: '5 min ago' },
+  const [alerts] = useState([
+    { id: 1, text: 'Khalid has 6 uncontacted leads (oldest: 23 min)', type: 'warning', time: '2 min ago' },
+    { id: 2, text: 'High-value lead (AED 5.1M villa, Palm Jumeirah) unassigned for 4 min', type: 'critical', time: '4 min ago' },
+    { id: 3, text: 'Priya just contacted Wei Zhang (response time: 28s)', type: 'success', time: '1 min ago' },
+    { id: 4, text: "Follow-up reminder: Alexei Petrov hasn't been contacted in 12 days", type: 'info', time: '5 min ago' },
   ]);
 
-  const typeBg = {
-    warning: 'border-l-accent bg-accent/5',
-    critical: 'border-l-danger bg-danger/5',
-    success: 'border-l-success bg-success/5',
-    info: 'border-l-pf-blue bg-pf-blue/5',
-  };
-
   return (
-    <div className="bg-dark-card border border-dark-border rounded-lg p-4 h-full">
-      <h3 className="text-sm font-semibold text-white mb-4">Escalation Alerts</h3>
-      <div className="space-y-2">
+    <Panel title="Escalation alerts" className="h-full">
+      <ul className="divide-y divide-line">
         {alerts.map(a => (
-          <div key={a.id} className={`border-l-2 rounded-r-md px-3 py-2.5 ${typeBg[a.type]}`}>
-            <div className="text-xs text-gray-200 leading-relaxed">
-              <span className="mr-1">{a.icon}</span> {a.text}
-            </div>
-            <div className="text-[10px] text-gray-600 mt-1">{a.time}</div>
-          </div>
+          <li key={a.id} className="px-4 py-3 flex items-start gap-3">
+            <Icon name={ALERT_STYLE[a.type].icon} className={`w-4 h-4 mt-0.5 ${ALERT_STYLE[a.type].color}`} />
+            <p className="flex-1 min-w-0 text-[13px] leading-5 text-ink">{a.text}</p>
+            <span className="text-xs leading-5 text-ink-3 whitespace-nowrap tabular-nums">{a.time}</span>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </Panel>
   );
 }
 
@@ -390,7 +453,6 @@ function EscalationAlerts() {
 function OperationsDashboard() {
   const [leads, setLeads] = useState(generateInitialLeads);
   const leadIdRef = useRef(16);
-  const newLeadIdsRef = useRef(new Set());
 
   // Add new leads periodically
   useEffect(() => {
@@ -398,13 +460,7 @@ function OperationsDashboard() {
       const newLead = generateLead(leadIdRef.current++, 0);
       newLead.isNew = true;
       newLead.status = 'pending';
-      newLeadIdsRef.current.add(newLead.id);
       setLeads(prev => [newLead, ...prev.slice(0, 19)]);
-
-      // Clear "new" flag after animation
-      setTimeout(() => {
-        newLeadIdsRef.current.delete(newLead.id);
-      }, 2000);
     }, randomBetween(8000, 12000));
 
     return () => clearInterval(interval);
@@ -440,46 +496,54 @@ function OperationsDashboard() {
 
   const contactedCount = leads.filter(l => l.status === 'contacted').length;
   const pendingCount = leads.filter(l => l.status === 'pending').length;
+  const overdueCount = leads.filter(l => l.status === 'overdue').length;
 
   return (
-    <div className="max-w-[1920px] mx-auto px-6 py-5 space-y-5">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4">
-        <KPICard label="Leads Today" value="34" badge={{ text: '+3 new', color: 'bg-success/20 text-success' }} sub="vs 28 yesterday" />
-        <KPICard label="Avg Response Time" value="47s" color="text-success" sub="Target: <60s" />
-        <KPICard label="Follow-ups Due Today" value="12" color="text-accent" badge={{ text: '3 overdue', color: 'bg-danger/20 text-danger' }} sub="8 completed" />
-        <KPICard label="Pipeline Value" value="AED 14.2M" sub="32 active opportunities" />
+    <main className={`${PAGE} py-6 space-y-5`}>
+      <PageHeading title="Operations" description="Lead response and agent performance for today." />
+
+      {/* KPIs: one band, four cells */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-line border border-line rounded-lg overflow-hidden">
+        <KPICard label="Leads today" value="34" badge={{ text: '+3 new', tone: 'positive' }} sub="vs 28 yesterday" />
+        <KPICard label="Avg response time" value="47s" sub="Target: <60s" />
+        <KPICard label="Follow-ups due today" value="12" badge={{ text: '3 overdue', tone: 'negative' }} sub="8 completed" />
+        <KPICard label="Pipeline value" value="AED 14.2M" sub="32 active opportunities" />
       </div>
 
       {/* Main area: Feed + Leaderboard */}
-      <div className="grid grid-cols-5 gap-5" style={{ minHeight: '480px' }}>
-        <div className="col-span-3">
-          <div className="bg-dark-card border border-dark-border rounded-lg overflow-hidden h-full flex flex-col">
-            <div className="px-4 py-3 border-b border-dark-border flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Live Lead Feed</h3>
-              <div className="flex items-center gap-3 text-[10px] text-gray-500">
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success"></span>{contactedCount} contacted</span>
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-accent"></span>{pendingCount} pending</span>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        {/* On wide screens the feed takes its height from the leaderboard beside it */}
+        <div className="xl:col-span-7 min-w-0 relative">
+          <Panel
+            title="Live lead feed"
+            className="h-[480px] xl:h-auto xl:absolute xl:inset-0"
+            bodyClassName="overflow-y-auto"
+            aside={
+              <div className="flex items-center gap-4 text-xs text-ink-3 tabular-nums">
+                <span className="flex items-center gap-1.5"><Dot className="bg-positive" />{contactedCount} contacted</span>
+                <span className="flex items-center gap-1.5"><Dot className="bg-accent" />{pendingCount} pending</span>
+                <span className="flex items-center gap-1.5"><Dot className="bg-negative" />{overdueCount} overdue</span>
               </div>
-            </div>
-            <div className="overflow-y-auto flex-1 p-3 space-y-2" style={{ maxHeight: '440px' }}>
+            }
+          >
+            <ul className="divide-y divide-line">
               {leads.map(lead => (
-                <LeadCard key={lead.id} lead={lead} isNew={newLeadIdsRef.current.has(lead.id)} />
+                <LeadCard key={lead.id} lead={lead} isNew={lead.isNew} />
               ))}
-            </div>
-          </div>
+            </ul>
+          </Panel>
         </div>
-        <div className="col-span-2">
+        <div className="xl:col-span-5 min-w-0">
           <AgentLeaderboard />
         </div>
       </div>
 
       {/* Bottom: Source Performance + Alerts */}
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <SourcePerformance />
         <EscalationAlerts />
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -487,39 +551,54 @@ function OperationsDashboard() {
 // LIVE DEMO VIEW
 // ═══════════════════════════════════════════════════════════════
 
+// WhatsApp renders *text* as bold
+function formatWhatsApp(text) {
+  return text.split(/(\*[^*\n]+\*)/g).map((part, i) => (
+    part.length > 2 && part.startsWith('*') && part.endsWith('*')
+      ? <strong key={i} className="font-semibold">{part.slice(1, -1)}</strong>
+      : part
+  ));
+}
+
 // --- WhatsApp Phone Mockup ---
 function WhatsAppPhone({ label, messages, contactName }) {
+  const chatRef = useRef(null);
+
+  // Keep the latest reply in view once a thread has more than one message
+  useEffect(() => {
+    if (messages.length > 1 && chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages.length]);
+
   return (
-    <div className="flex flex-col">
-      <div className="text-xs text-gray-500 font-medium mb-2 text-center">{label}</div>
-      <div className="bg-[#0B141A] rounded-2xl border border-dark-border overflow-hidden shadow-2xl w-full max-w-[340px] mx-auto">
+    <div className="flex flex-col min-w-0">
+      <div className="text-[13px] text-ink-2 font-medium mb-2">{label}</div>
+      <div className="bg-wa-bg rounded-2xl border border-line-strong overflow-hidden w-full">
         {/* WhatsApp Header */}
-        <div className="bg-[#1F2C34] px-3 py-2.5 flex items-center gap-3">
-          <div className="w-3 h-3 text-gray-400">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-[#2A3942] flex items-center justify-center text-xs text-gray-400 font-semibold">
+        <div className="bg-wa-bar px-3 h-12 flex items-center gap-3">
+          <Icon name="back" className="w-4 h-4 text-ink-3" />
+          <div className="w-8 h-8 rounded-full bg-wa-field flex items-center justify-center text-xs text-ink-2 font-semibold">
             {contactName?.[0] || 'U'}
           </div>
-          <div>
-            <div className="text-xs font-semibold text-gray-200">{contactName || 'Contact'}</div>
-            <div className="text-[10px] text-gray-500">online</div>
+          <div className="min-w-0">
+            <div className="text-[13px] leading-4 font-semibold text-ink truncate">{contactName || 'Contact'}</div>
+            <div className="text-[11px] leading-4 text-ink-3">online</div>
           </div>
         </div>
         {/* Chat area */}
-        <div className="bg-[#0B141A] min-h-[280px] max-h-[320px] overflow-y-auto p-3 space-y-2"
-             style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, rgba(37,211,102,0.02) 0%, transparent 50%)' }}>
+        <div ref={chatRef} className="h-[300px] xl:h-[236px] overflow-y-auto p-3 space-y-2">
           {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.sent ? 'justify-end' : 'justify-start'} animate-bubble-in`} style={{ animationDelay: `${msg.delay || 0}ms` }}>
-              <div className={`max-w-[85%] px-3 py-2 text-xs leading-relaxed ${
-                msg.sent ? 'bg-[#005C4B] text-gray-100 rounded-lg rounded-tr-none' : 'bg-[#1F2C34] text-gray-200 rounded-lg rounded-tl-none'
+            <div key={i} className={`flex ${msg.sent ? 'justify-end' : 'justify-start'} animate-enter`} style={{ animationDelay: `${msg.delay || 0}ms` }}>
+              <div className={`max-w-[85%] px-3 py-2 text-[13px] leading-5 text-ink ${
+                msg.sent ? 'bg-wa-sent rounded-lg rounded-tr-none' : 'bg-wa-bar rounded-lg rounded-tl-none'
               }`}>
-                <div style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</div>
-                <div className="flex items-center justify-end gap-1 mt-1">
-                  <span className="text-[9px] text-gray-500">{msg.time || '12:34 PM'}</span>
+                <div className="whitespace-pre-wrap break-words">{formatWhatsApp(msg.text)}</div>
+                <div className="flex items-center justify-end gap-1 mt-1 text-[11px] leading-4">
+                  <span className="text-ink/55">{msg.time || '12:34 PM'}</span>
                   {msg.sent && (
-                    <span className={`text-[10px] ${msg.read ? 'text-[#53BDEB]' : 'text-gray-500'}`}>
-                      {'\u2713\u2713'}
+                    <span className={msg.read ? 'text-wa-tick' : 'text-ink/55'}>
+                      {'✓✓'}
                     </span>
                   )}
                 </div>
@@ -527,16 +606,16 @@ function WhatsAppPhone({ label, messages, contactName }) {
             </div>
           ))}
           {messages.length === 0 && (
-            <div className="flex items-center justify-center h-full text-xs text-gray-600 py-20">
-              Messages will appear here...
+            <div className="flex items-center justify-center h-full text-[13px] text-ink-3">
+              Messages will appear here
             </div>
           )}
         </div>
         {/* Input bar */}
-        <div className="bg-[#1F2C34] px-3 py-2 flex items-center gap-2">
-          <div className="text-gray-500 text-sm">+</div>
-          <div className="flex-1 bg-[#2A3942] rounded-full px-3 py-1.5 text-[10px] text-gray-500">Type a message</div>
-          <div className="text-gray-500 text-xs">{'\uD83C\uDF99\uFE0F'}</div>
+        <div className="bg-wa-bar px-3 h-12 flex items-center gap-2.5 text-ink-3" aria-hidden="true">
+          <Icon name="plus" className="w-5 h-5" />
+          <div className="flex-1 bg-wa-field rounded-full px-3.5 h-8 flex items-center text-[13px]">Type a message</div>
+          <Icon name="mic" className="w-5 h-5" />
         </div>
       </div>
     </div>
@@ -544,44 +623,68 @@ function WhatsAppPhone({ label, messages, contactName }) {
 }
 
 // --- Timeline Step ---
-function TimelineStep({ step, visible }) {
-  if (!visible) return null;
+const STEP_STYLE = {
+  success: { icon: 'check', color: 'text-positive' },
+  timer: { icon: 'clock', color: 'text-accent' },
+  warning: { icon: 'warning', color: 'text-accent' },
+  reassign: { icon: 'swap', color: 'text-ink-2' },
+  alert: { icon: 'bell', color: 'text-negative' },
+};
 
-  const icons = {
-    success: <span className="text-success">{'\u2705'}</span>,
-    timer: <span className="text-accent">{'\u23F1\uFE0F'}</span>,
-    warning: <span className="text-accent">{'\u26A0\uFE0F'}</span>,
-    reassign: <span className="text-pf-blue">{'\uD83D\uDD04'}</span>,
-    alert: <span className="text-danger">{'\uD83D\uDCF1'}</span>,
-  };
+function StepDetail({ detail }) {
+  const box = 'mt-2 bg-canvas border border-line rounded-md px-3 py-2.5 text-[13px] leading-5';
+  if (detail.rows) {
+    return (
+      <dl className={`${box} grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1`}>
+        {detail.rows.map(([k, v]) => (
+          <div key={k} className="contents">
+            <dt className="text-ink-3">{k}</dt>
+            <dd className="text-ink-2 break-words">{v}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+  if (detail.checks) {
+    return (
+      <ul className={`${box} space-y-1`}>
+        {detail.checks.map(c => (
+          <li key={c} className="flex items-start gap-2 text-ink-2">
+            <Icon name="check" className="w-3.5 h-3.5 mt-[3px] text-positive" />
+            <span>{c}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  return (
+    <div className={`${box} text-ink-2 space-y-0.5`}>
+      {detail.lines.map(line => <p key={line}>{line}</p>)}
+    </div>
+  );
+}
+
+function TimelineStep({ step, visible, isLast }) {
+  if (!visible) return null;
+  const style = STEP_STYLE[step.type] || STEP_STYLE.alert;
 
   return (
-    <div className="animate-timeline-step flex gap-3 items-start">
-      <div className="flex flex-col items-center flex-shrink-0">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-          step.type === 'success' ? 'bg-success/10 border border-success/30' :
-          step.type === 'timer' ? 'bg-accent/10 border border-accent/30' :
-          step.type === 'warning' ? 'bg-accent/10 border border-accent/30' :
-          step.type === 'reassign' ? 'bg-pf-blue/10 border border-pf-blue/30' :
-          'bg-danger/10 border border-danger/30'
-        }`}>
-          {icons[step.type]}
+    <li className="animate-enter flex gap-3">
+      <div className="flex flex-col items-center shrink-0">
+        <div className={`w-6 h-6 rounded-full bg-raised border border-line-strong flex items-center justify-center ${style.color}`}>
+          <Icon name={style.icon} className="w-3.5 h-3.5" />
         </div>
-        <div className="w-px h-6 bg-dark-border"></div>
+        {!isLast && <div className="w-px flex-1 bg-line mt-1"></div>}
       </div>
-      <div className="flex-1 pb-2">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[10px] text-gray-600 font-mono">[{step.time}]</span>
-          <span className="text-xs font-medium text-gray-200">{step.label}</span>
+      <div className={`flex-1 min-w-0 ${isLast ? '' : 'pb-5'}`}>
+        <div className="flex items-baseline justify-between gap-3 min-h-6">
+          <span className="text-sm font-medium text-ink">{step.label}</span>
+          <span className="text-xs text-ink-3 tabular-nums shrink-0">{step.time}</span>
         </div>
-        {step.detail && (
-          <div className="bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-[11px] text-gray-400 leading-relaxed mt-1">
-            {step.detail}
-          </div>
-        )}
+        {step.detail && <StepDetail detail={step.detail} />}
         {step.countdown && <CountdownTimer />}
       </div>
-    </div>
+    </li>
   );
 }
 
@@ -595,9 +698,18 @@ function CountdownTimer() {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return (
-    <div className="flex items-center gap-2 mt-2">
-      <span className="text-accent font-mono text-lg font-bold">{m.toString().padStart(2, '0')}:{s.toString().padStart(2, '0')}</span>
-      <span className="text-xs text-gray-500">remaining</span>
+    <div className="flex items-baseline gap-2 mt-1.5">
+      <span className="text-ink tabular-nums text-xl font-semibold tracking-tight">{m.toString().padStart(2, '0')}:{s.toString().padStart(2, '0')}</span>
+      <span className="text-[13px] text-ink-3">remaining</span>
+    </div>
+  );
+}
+
+function Field({ id, label, children }) {
+  return (
+    <div>
+      <label htmlFor={id} className="text-[13px] font-medium text-ink-2 mb-1.5 block">{label}</label>
+      {children}
     </div>
   );
 }
@@ -669,17 +781,17 @@ function LiveDemo() {
 
     const steps = [
       { time: '0.0s', type: 'success', label: `Lead captured from ${form.source}`, delay: 500,
-        detail: `Name: ${form.name} ${natFlag}\nNationality: ${form.nationality}\nProperty: ${form.property}\nBudget: ${form.budget}\nPhone: ${form.phone}\nSource: ${form.source}` },
+        detail: { rows: [['Name', `${form.name} ${natFlag}`], ['Nationality', form.nationality], ['Property', form.property], ['Budget', form.budget], ['Phone', form.phone], ['Source', form.source]] } },
       { time: '1.5s', type: 'success', label: 'Lead scored: 78/100 (High intent)', delay: 2000,
-        detail: `\u2705 Budget match: ${form.budget} aligns with property value\n\u2705 Active market segment: ${form.nationality} buyers in high demand\n\u2705 Direct unit inquiry: Specific property selected\n\u2705 High-demand area: Strong rental yields & appreciation` },
+        detail: { checks: [`Budget match: ${form.budget} aligns with property value`, `Active market segment: ${form.nationality} buyers in high demand`, 'Direct unit inquiry: Specific property selected', 'High-demand area: Strong rental yields & appreciation'] } },
       { time: '2.5s', type: 'success', label: `Agent matched: ${matchedAgent.name}`, delay: 3500,
-        detail: `${matchedAgent.areas.join(' & ')} specialist\nSpeaks: ${matchedAgent.languages.join(', ')}\n${matchedAgent.contactRate}% contact rate | ${matchedAgent.avgResponse}s avg response` },
+        detail: { lines: [`${matchedAgent.areas.join(' & ')} specialist`, `Speaks: ${matchedAgent.languages.join(', ')}`, `${matchedAgent.contactRate}% contact rate · ${matchedAgent.avgResponse}s avg response`] } },
       { time: '3.5s', type: 'success', label: 'WhatsApp sent to buyer', delay: 5000 },
       { time: '4.0s', type: 'success', label: 'Agent notified via WhatsApp', delay: 6000 },
       { time: '4.5s', type: 'timer', label: 'Response timer started: 10:00 minutes remaining', delay: 7000, countdown: true },
     ];
 
-    steps.forEach((step, i) => {
+    steps.forEach(step => {
       const t = setTimeout(() => {
         setTimelineSteps(prev => [...prev, step]);
       }, step.delay);
@@ -742,7 +854,7 @@ function LiveDemo() {
       { time: '10:00', type: 'warning', label: `No confirmation from ${matchedAgent.name} \u2014 escalating`, delay: 500 },
       { time: '10:02', type: 'reassign', label: 'Lead reassigned to Sarah Thompson (backup)', delay: 1500 },
       { time: '10:03', type: 'alert', label: 'Manager alert sent to Omar Al-Farsi (Sales Director)', delay: 2500,
-        detail: `\u26A0\uFE0F ESCALATION: ${matchedAgent.name} did not contact ${form.name} (${form.property.split(',').pop().trim()}, ${form.property.split(',')[1]?.trim()}) within 10 minutes. Lead reassigned to Sarah. This is ${matchedAgent.name}'s 3rd missed lead today.` },
+        detail: { lines: [`Escalation: ${matchedAgent.name} did not contact ${form.name} (${form.property.split(',').pop().trim()}, ${form.property.split(',')[1]?.trim()}) within 10 minutes. Lead reassigned to Sarah. This is ${matchedAgent.name}'s 3rd missed lead today.`] } },
     ];
 
     escalationSteps.forEach(step => {
@@ -764,153 +876,130 @@ function LiveDemo() {
     timeoutRefs.current.push(escMsgTimeout);
   }, [form.name, form.property, matchedAgent.name]);
 
+  const setField = key => e => setForm(f => ({ ...f, [key]: e.target.value }));
+
+  const timelineRef = useRef(null);
+  const startDemo = () => {
+    runDemo();
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      timelineRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <div className="max-w-[1920px] mx-auto px-6 py-5">
-      <div className="grid grid-cols-12 gap-5" style={{ minHeight: 'calc(100vh - 120px)' }}>
+    <main className={`${PAGE} py-6 space-y-5`}>
+      <PageHeading title="Live demo" description="Send a sample lead through routing, messaging and escalation." />
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Left: Lead Trigger */}
-        <div className="col-span-3">
-          <div className="bg-dark-card border border-dark-border rounded-lg p-5 sticky top-20">
-            <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-              {'\u26A1'} Lead Trigger Panel
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block">Name</label>
-                <input
-                  className="w-full bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-sm text-white focus:border-accent focus:outline-none transition-colors"
-                  value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block">Nationality</label>
-                <select
-                  className="w-full bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-sm text-white focus:border-accent focus:outline-none transition-colors"
-                  value={form.nationality}
-                  onChange={e => setForm(f => ({ ...f, nationality: e.target.value }))}
-                >
-                  {NATIONALITY_KEYS.map(k => (
-                    <option key={k} value={k}>{NATIONALITIES[k].flag} {k}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block">Source</label>
-                <select
-                  className="w-full bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-sm text-white focus:border-accent focus:outline-none transition-colors"
-                  value={form.source}
-                  onChange={e => setForm(f => ({ ...f, source: e.target.value }))}
-                >
-                  {SOURCES.map(s => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block">Property</label>
-                <input
-                  className="w-full bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-sm text-white focus:border-accent focus:outline-none transition-colors"
-                  value={form.property}
-                  onChange={e => setForm(f => ({ ...f, property: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block">Phone</label>
-                <input
-                  className="w-full bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-sm text-white focus:border-accent focus:outline-none transition-colors"
-                  value={form.phone}
-                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 block">Budget</label>
-                <input
-                  className="w-full bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-sm text-white focus:border-accent focus:outline-none transition-colors"
-                  value={form.budget}
-                  onChange={e => setForm(f => ({ ...f, budget: e.target.value }))}
-                />
-              </div>
-              <button
-                onClick={isRunning ? resetDemo : runDemo}
-                className={`w-full py-3 rounded-md text-sm font-semibold transition-all duration-200 cursor-pointer mt-2 ${
-                  isRunning
-                    ? 'bg-dark-bg border border-dark-border text-gray-400 hover:text-white'
-                    : 'bg-accent text-black hover:bg-amber-400 animate-pulse-glow'
-                }`}
-              >
-                {isRunning ? '\u21BB Reset Demo' : '\u26A1 Simulate New Lead'}
-              </button>
-            </div>
-          </div>
+        <div className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-20 min-w-0">
+          <Panel title="Lead trigger" bodyClassName="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+            <Field id="lead-name" label="Name">
+              <input id="lead-name" className={FIELD} value={form.name} onChange={setField('name')} />
+            </Field>
+            <Field id="lead-nationality" label="Nationality">
+              <select id="lead-nationality" className={`${FIELD} select-chevron`} value={form.nationality} onChange={setField('nationality')}>
+                {NATIONALITY_KEYS.map(k => (
+                  <option key={k} value={k}>{NATIONALITIES[k].flag} {k}</option>
+                ))}
+              </select>
+            </Field>
+            <Field id="lead-source" label="Source">
+              <select id="lead-source" className={`${FIELD} select-chevron`} value={form.source} onChange={setField('source')}>
+                {SOURCES.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </Field>
+            <Field id="lead-property" label="Property">
+              <input id="lead-property" className={FIELD} value={form.property} onChange={setField('property')} />
+            </Field>
+            <Field id="lead-phone" label="Phone">
+              <input id="lead-phone" className={FIELD} value={form.phone} onChange={setField('phone')} />
+            </Field>
+            <Field id="lead-budget" label="Budget">
+              <input id="lead-budget" className={FIELD} value={form.budget} onChange={setField('budget')} />
+            </Field>
+            <button
+              onClick={isRunning ? resetDemo : startDemo}
+              className={`w-full sm:col-span-2 lg:col-span-1 ${isRunning ? BTN_SECONDARY : BTN_PRIMARY}`}
+            >
+              <Icon name={isRunning ? 'reset' : 'play'} />
+              {isRunning ? 'Reset demo' : 'Simulate new lead'}
+            </button>
+          </Panel>
         </div>
 
         {/* Center: Automation Timeline */}
-        <div className="col-span-5">
-          <div className="bg-dark-card border border-dark-border rounded-lg p-5 h-full">
-            <h3 className="text-sm font-semibold text-white mb-5">Automation Timeline</h3>
+        <div ref={timelineRef} className="lg:col-span-8 xl:col-span-5 min-w-0 scroll-mt-28 sm:scroll-mt-20">
+          <Panel title="Automation timeline" className="min-h-[320px]" bodyClassName="p-4">
             {timelineSteps.length === 0 && !isRunning && (
-              <div className="flex flex-col items-center justify-center py-20 text-gray-600">
-                <div className="text-4xl mb-3">{'\u26A1'}</div>
-                <div className="text-sm">Click "Simulate New Lead" to start</div>
-                <div className="text-xs mt-1 text-gray-700">Watch the automation unfold in real-time</div>
+              <div className="py-16 text-center">
+                <div className="text-sm font-medium text-ink">No lead in progress</div>
+                <div className="text-[13px] text-ink-3 mt-1">Press "Simulate new lead" to watch the automation run step by step.</div>
               </div>
             )}
-            <div className="space-y-1">
+            {timelineSteps.length === 0 && isRunning && (
+              <div className="py-16 text-center text-[13px] text-ink-3">Capturing lead…</div>
+            )}
+            <ol>
               {timelineSteps.map((step, i) => (
-                <TimelineStep key={i} step={step} visible={true} />
+                <TimelineStep key={i} step={step} visible={true} isLast={i === timelineSteps.length - 1} />
               ))}
-            </div>
+            </ol>
 
             {/* Outcome buttons */}
             {showOutcomeButtons && !outcomeResult && (
-              <div className="mt-6 space-y-2 animate-fade-in">
-                <div className="text-xs text-gray-500 mb-3">Choose outcome to simulate:</div>
-                <button
-                  onClick={simulateConfirm}
-                  className="w-full py-3 bg-success/10 border border-success/30 text-success rounded-md text-sm font-semibold hover:bg-success/20 transition-colors cursor-pointer"
-                >
-                  {'\u2705'} Simulate: Agent Confirms Contact
-                </button>
-                <button
-                  onClick={simulateEscalation}
-                  className="w-full py-3 bg-danger/10 border border-danger/30 text-danger rounded-md text-sm font-semibold hover:bg-danger/20 transition-colors cursor-pointer"
-                >
-                  {'\u26A0\uFE0F'} Simulate: Agent Doesn't Respond
-                </button>
+              <div className="mt-5 pt-4 border-t border-line animate-enter">
+                <div className="text-[13px] text-ink-2 mb-3">Choose an outcome to simulate</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button onClick={simulateConfirm} className={BTN_SECONDARY}>
+                    <Icon name="check" className="w-4 h-4 text-positive" />
+                    Agent confirms contact
+                  </button>
+                  <button onClick={simulateEscalation} className={BTN_SECONDARY}>
+                    <Icon name="warning" className="w-4 h-4 text-negative" />
+                    Agent doesn't respond
+                  </button>
+                </div>
               </div>
             )}
 
             {/* Outcome result */}
             {outcomeResult === 'confirmed' && (
-              <div className="mt-6 bg-success/10 border border-success/30 rounded-lg p-4 animate-fade-in">
-                <div className="text-success text-sm font-semibold mb-1">{'\u2705'} Lead Successfully Contacted</div>
-                <div className="text-xs text-gray-400">
-                  {matchedAgent.name} confirmed contact with {form.name} at 12:35 PM.<br/>
-                  Response time: 52 seconds.<br/>
-                  Lead moved to Active Pipeline.
+              <div className="mt-5 pt-4 border-t border-line flex items-start gap-3 animate-enter">
+                <Icon name="check" className="w-4 h-4 mt-0.5 text-positive" />
+                <div>
+                  <div className="text-sm font-medium text-ink">Lead successfully contacted</div>
+                  <div className="text-[13px] leading-5 text-ink-2 mt-1">
+                    {matchedAgent.name} confirmed contact with {form.name} at 12:35 PM.<br/>
+                    Response time: 52 seconds.<br/>
+                    Lead moved to Active Pipeline.
+                  </div>
                 </div>
               </div>
             )}
-          </div>
+          </Panel>
         </div>
 
         {/* Right: WhatsApp Mockups */}
-        <div className="col-span-4">
-          <div className="space-y-5 sticky top-20">
+        <div className="lg:col-span-12 xl:col-span-4 min-w-0 sticky-when-tall">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-5">
             <WhatsAppPhone
-              label={`\uD83D\uDCF1 Buyer's WhatsApp`}
+              label="Buyer's WhatsApp"
               messages={buyerMessages}
               contactName="Elite Properties Dubai"
             />
             <WhatsAppPhone
-              label={`\uD83D\uDCF1 Agent's WhatsApp (${matchedAgent.name})`}
+              label={`Agent's WhatsApp (${matchedAgent.name})`}
               messages={agentMessages}
               contactName="LeadEngine Bot"
             />
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -922,7 +1011,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   return (
-    <div className="min-h-screen bg-dark-bg">
+    <div className="min-h-screen bg-canvas">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === 'dashboard' ? <OperationsDashboard /> : <LiveDemo />}
     </div>
